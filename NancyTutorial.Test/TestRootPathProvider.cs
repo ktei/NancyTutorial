@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Nancy;
+using System;
 using System.IO;
 using System.Linq;
-using System.Text;
-using Nancy;
 
 namespace NancyTutorial.Test
 {

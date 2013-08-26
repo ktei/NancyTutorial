@@ -1,0 +1,105 @@
+感谢大家的捧场，我今晚睡觉前继续写一点（不会太多）。正是开始之前，首先我得纠正我犯的小错误。打开.gitignore，将/packages删掉，原因在于我们还是把各种依赖DLL也check in，这样更方便一些。改后的.gitignore变为：
+
+/NancyTutorial/bin
+/NancyTutorial/obj
+
+[b]第一个测试[/b]
+下面我们来部署一下基本的测试框架。首先，新建一个Class Library项目，即类库项目，命名其为NancyTutorial.Test。之后，右键点NancyTutorial项目，然后选择Nuget管理，在线搜 Nancy.testing，然后安装它。如下图所示[img=http://img.bbs.csdn.net/upload/201308/26/1377528403_822197.png][/img]
+接下来，类似的方式，用Nuget安装NUnit。
+最后，将NancyTutorial加入引用。
+
+在NancyTutorial.Test下新建一个Class，名为IndexModuleTest，内容如下：
+
+[code=csharp]
+using Nancy;
+using Nancy.Testing;
+using NUnit.Framework;
+
+namespace NancyTutorial.Test
+{
+    [TestFixture]
+    public class IndexModuleTest
+    {
+        [Test]
+        public void root_should_return_response_ok()
+        {
+            var bootstrapper = new ConfigurableBootstrapper(with =>
+            {
+                with.Module<IndexModule>();
+                with.RootPathProvider(new TestRootPathProvider());
+            });
+            var browser = new Browser(bootstrapper);
+
+            var response = browser.Get("/");
+
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+        }
+    }
+}
+[/code]
+
+以上我简单说明一下。这其实就是测试一下对于网站根目录（例如localhost:5000）的请求能否顺利返回Status code 200，也就是测试GET('/')这一路由是否存在。在bootstrapper内，我们囊括了IndexModule，这是因为IndexModeule是负责处理GET('/')请求的，而这也正是我们要测试的。至于那个RootPathProvider，我们现在来添加：
+
+NancyTutorial.Test下，新建一个名为TestRootPathProvider的Class，其内容如下：
+[code=csharp]
+using Nancy;
+using System;
+using System.IO;
+using System.Linq;
+
+namespace NancyTutorial.Test
+{
+    public class TestRootPathProvider : IRootPathProvider
+    {
+        private static string _cachedRootPath;
+
+        public string GetRootPath()
+        {
+            if (!string.IsNullOrEmpty(_cachedRootPath))
+                return _cachedRootPath;
+
+            var currentDirectory = new DirectoryInfo(Environment.CurrentDirectory);
+
+            bool rootPathFound = false;
+            while (!rootPathFound)
+            {
+                var directoriesContainingViewFolder = currentDirectory.GetDirectories(
+                          "Views", SearchOption.AllDirectories);
+                if (directoriesContainingViewFolder.Any())
+                {
+                    _cachedRootPath = directoriesContainingViewFolder.First().FullName;
+                    rootPathFound = true;
+                }
+
+                currentDirectory = currentDirectory.Parent;
+            }
+
+            return _cachedRootPath;
+        }
+    }
+}
+[/code]
+注意，以上这个TestRootPathProvider并不是我写，我是参照[url=http://www.jefclaes.be/2012/06/making-my-first-nancyfx-test-pass.html]这里[/url]给出的代码。之所以做这么一通，不是我闲的蛋疼，而是因为我们的NancyTutorial.Test是一个独立类库项目，所以它并不知道NancyTutorial内部的结构，因此我们得显式的告诉NancyTutorial.Test（以下简称Test项目），NancyTutorial（以下简称主项目）的内部是怎样的，这样Test项目中测试才有意义，否则，基本上每一个测试都会fail掉。到目前为止，你可能已经有点晕了，但是别担心，你不太需要明白以上的具体原理，你需要的只是将第一个测试跑通就足够。
+
+现在，同时按下Ctrl+Shift+B来build你的项目。
+
+[b]用NUnit来跑测试[/b]
+还记得你之前装了NUnit么？现在就把它打开吧。接着，选择File->Open project。我们需要打开的是Test项目的DLL。在我的机器上，其路径是：
+C:\dev\nancy\NancyTutorial\NancyTutorial.Test\bin\Debug\NancyTutorial.Test.dll
+
+你可以根据此路径猜到你应该打开的DLL是什么。
+
+打开DLL后，你就点Run吧。如果一切都顺利，测试应该是通过的。
+
+今晚的内容差不多快接受了。在你check in代码前，你还得把.gitignore打开，然后在里面加入点新东西，变成下面的样子：
+/NancyTutorial/bin
+/NancyTutorial/obj
+/NancyTutorial.Test/bin
+/NancyTutorial.Test/obj
+为什么这么做，我就不具体解释了，留给你自己去思考。
+
+最后，同前面一样，使用
+git add .
+git commit -m "test infrastructure"
+
+这两个命令来check in你的代码。
