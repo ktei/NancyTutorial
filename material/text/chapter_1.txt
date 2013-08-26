@@ -1,0 +1,45 @@
+我之前发过MVVM模式的WPF开发，结果满帖子全是口水战……也罢，我发个别的类型的帖子呗。之前的喷子，你只要来喷我就反喷你（如果我勤快的话，但多半时候我比较懒）。再就是关于我的结贴率：你就别操心了——我唯一发过的几个帖子都不是问问题的，所以我也不需要结帖。换句话说，我没在CSDN发帖问过问题。好，下面进入主题。
+
+这个教学贴的目的不是教你做asp.net webform或asp.net mvc，更不是教你怎么新建一个“企业级”网站（我现在听到“企业级”三个字就反胃）。我主要是想通过这样一个帖子帮助编程新手理顺编程中（特别是web开发中）常用的知识。之所以既不讲asp.net webform，又不提asp.net mvc，是因为它们会使读者把更多精力放在怎么使用这些框架上，有点背离此贴的初衷。我在网上搜了一下其他框架，发现[url=https://github.com/NancyFx/Nancy/wiki/Hosting-Nancy-with-asp.net]Nancy[/url]还不错，挺适合教学贴的。所以，我们接下来就以它为例。
+
+[b]基础环境搭建[/b]
+首先，你最好还是有个VS。如果你非要用笔记本写程序，我也不跟你废话——请滚。关于VS版本，最低2010，最好是2012（跟我的VS一致）。
+
+有了VS，你还得有Nancy。我这里就不罗嗦介绍Nancy是什么了，你自己去Google。当然，简单说一下的话，Nancy可以看成是.NET平台下的Sinatra（有人问Sinatra是什么，它是基于Ruby的一个轻型web框架）（有人问Ruby是什么……你自己Google!）。到这里下载[url=http://visualstudiogallery.msdn.microsoft.com/f1e29f61-4dff-4b1e-a14b-6bd0d307611a]Nancy template[/url]
+
+IDE和web框架都有了，接下来就是代码管理了。我不强迫你用Git，但是我推荐你用Git，原因有很多，但是就不在这里列举了，因为本帖不是Git教学。到这里下载[url=http://git-scm.com/downloads]Git[/url]。
+
+仔细想想的话，还缺点东西：测试框架。这个我也不限制你，但是这篇帖子里会用NUnit。到这里下载[url=http://www.nunit.org/index.php?p=download]NUnit[/url]。
+
+以上，最重要的是：下载完了以后你可别忘记安装啊。
+
+[b]建立新项目[/b]
+打开VS，新建一个项目。由于你已经安装了Nancy的template，所以你应该可以选择跟我一样的模板，如下图所示。
+[img=http://img.bbs.csdn.net/upload/201308/26/1377490573_241689.png][/img]
+注意，模板类型为Nancy Application with ASP.NET Hosting。项目名称为NancyTutorial。接下来，项目建完后，按F5跑一下，这时候应该能跑通（如果跑不通的话……原因可能有很多，我无法预测，你得自己想办法了）。我们可以先简单看一下Nancy的结构，其实主要就是Bootstrapper + Module + Views。Bootstrapper说白了就是web程序的启动入口，是一切的源头。Module(新建项目里你看到的是IndexModule)是用来处理客户端请求的，有点类似于Route+Controller。Views很简单，就是输出给客户端的页面。
+
+[b]将新建项目加入Git[/b]
+我默认你是使用Git来进行代码管理，所以我们先练习一点点简单的Git指令，以便让你往后更方便的管理你的代码。在你安装完Git后，你应该会有Git Bash。按windows键，然后再搜索框里输入git bash，这样你应该能找到并打开它。打开的Git bash其实就是一个git的命令窗口。在此窗口下，你需要切换至NancyTutorial目录下。
+
+为了让git能跟踪你项目中文件的变化，你需要在当前目录下（NancyTotorial)让git初始化。如何做呢？输入git init，然后回车。
+
+紧接着，你再输入git status，查看git当前状态。你会发现一些红色的文件名被罗列了出来，这就说明你的git初始化已经成功了。
+
+可能已经有人迫不及待想把项目check in了。但是在那之前，我们还有一件重要的事情要做。你需要在NancyTutorial目录下建立一个.gitignore文件。注意，Windows可能会阻止你建立一个只有拓展名的文件，我估计你得自己想办法搞定（有很多方法hack它）。.gitignore到底是干毛用的？很简单：如果你没有此文件，git会跟踪当前目录下所有文件，包括.pdb,.dll等等诸如此类你根本不需要check in的文件。你通过.gitignore来告诉git哪些文件是需要被忽略的（即ignore)，从此后git不会跟踪被忽略的文件。
+
+当你建立完.gitignore后，用你最喜欢的文本编辑软件打开它，然后输入以下内容并保存。
+
+/packages
+/NancyTutorial/bin
+/NancyTutorial/obj
+
+看到这里你应该能明白到底哪些文件是我们不需要check in的。
+
+好了，现在终于可以check in了。同样，打开git bash，切换至项目目录（即NancyTutorial）。
+
+输入git add .
+
+注意，add后面那个点是需要输入的，它代表当前目录。之后，再输入
+git commit -m "Initial commit"
+
+然后回车。以上两个指令git add和git commit，我留给大家自己去google和学习。
