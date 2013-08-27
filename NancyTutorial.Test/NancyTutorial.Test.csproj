@@ -51,7 +51,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="IndexModuleTest.cs" />
+    <Compile Include="AccountTest.cs" />
+    <Compile Include="BaseTest.cs" />
+    <Compile Include="LoginTest.cs" />
+    <Compile Include="MemoTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestRootPathProvider.cs" />
   </ItemGroup>
