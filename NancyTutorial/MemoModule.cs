@@ -8,5 +8,12 @@ namespace NancyTutorial
 {
     public class MemoModule : NancyModule
     {
+        public MemoModule()
+        {
+            Get["/"] = parameters =>
+            {
+                return View["memo/index"];
+            };
+        }
     }
 }

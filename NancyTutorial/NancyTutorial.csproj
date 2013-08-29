@@ -58,6 +58,7 @@
     <Content Include="Content\css\bootstrap-theme.css" />
     <Content Include="Content\css\bootstrap.css" />
     <Content Include="Content\js\bootstrap.js" />
+    <Content Include="Content\js\jquery-1.10.2.js" />
     <Content Include="Content\nancy-logo.png" />
     <Content Include="Web.config" />
   </ItemGroup>
@@ -69,10 +70,19 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Views\index.sshtml">
+    <Content Include="Views\_master.sshtml">
       <SubType>Designer</SubType>
     </Content>
     <Content Include="packages.config" />
+    <Content Include="Views\memo\index.sshtml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Views\_header.sshtml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Views\_footer.sshtml">
+      <SubType>Designer</SubType>
+    </Content>
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -80,7 +90,10 @@
       <DependentUpon>Web.config</DependentUpon>
     </None>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Views\account\" />
+    <Folder Include="Views\login\" />
+  </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
