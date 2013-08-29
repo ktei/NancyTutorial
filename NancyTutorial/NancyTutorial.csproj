@@ -57,6 +57,7 @@
   <ItemGroup>
     <Content Include="Content\css\bootstrap-theme.css" />
     <Content Include="Content\css\bootstrap.css" />
+    <Content Include="Content\css\non-responsive.css" />
     <Content Include="Content\js\bootstrap.js" />
     <Content Include="Content\js\jquery-1.10.2.js" />
     <Content Include="Content\nancy-logo.png" />
@@ -83,6 +84,12 @@
     <Content Include="Views\_footer.sshtml">
       <SubType>Designer</SubType>
     </Content>
+    <Content Include="Views\account\create.sshtml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Views\login\login.sshtml">
+      <SubType>Designer</SubType>
+    </Content>
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -90,10 +97,7 @@
       <DependentUpon>Web.config</DependentUpon>
     </None>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Views\account\" />
-    <Folder Include="Views\login\" />
-  </ItemGroup>
+  <ItemGroup />
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>

@@ -8,6 +8,12 @@ namespace NancyTutorial
 {
     public class AccountModule : NancyModule
     {
-
+        public AccountModule()
+        {
+            Get["/signup"] = parameters =>
+            {
+                return View["account/create.sshtml"];
+            };
+        }
     }
 }

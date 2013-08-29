@@ -10,12 +10,10 @@ namespace NancyTutorial
     {
         public LoginModule()
         {
-            //Get["/login"] = parameters =>
-            //{
-            //    // Called when the user visits the login page or is redirected here because
-            //    // an attempt was made to access a restricted resource. It should return
-            //    // the view that contains the login form
-            //};
+            Get["/login"] = parameters =>
+            {
+                return View["login/login.sshtml"];
+            };
         }
     }
 }

@@ -13,6 +13,9 @@ namespace NancyTutorial.Test
     {
         private INancyBootstrapper _bootsrapper = new ConfigurableBootstrapper(with =>
         {
+            with.Module<AccountModule>();
+            with.Module<LoginModule>();
+            with.Module<MemoModule>();
             with.RootPathProvider(new TestRootPathProvider());
         });
 
