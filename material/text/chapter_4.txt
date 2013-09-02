@@ -1,0 +1,338 @@
+第一帖在这里：[url=http://bbs.csdn.net/topics/390565621]http://bbs.csdn.net/topics/390565621[/url]
+
+废话不多说，紧接着上回继续。我们基本上已经搭起了整个项目的后台框架，甚至还写了一个非常简单测试。之后，我们又回顾了一点浅显的HTTP交互的基本知识。接下来，我们该讲一些跟Nancy相关的东西了。首先，我们从最简单的地方开始。
+
+[b]What exactly are we going to build?[/b]
+很难在短短几个帖子里用一个复杂的项目来说明问题，我觉得学东西的时候，尤其对于初学者来说，例子越简单明了越好。我们的目标也很简单：就是做一个在线备忘录。基本流程大体是这样：用户登录以后，会显示出自己的所有备忘录链接。点击其中一个链接，可以看到该备忘录的详情。
+
+[b]关于MVC[/b]
+有人可能会对Nancy本身的模式感兴趣——它是否是遵循MVC的？Nancy并不是一个MVC框架，它基本上就是一个路由+请求处理的精简框架。Nancy在模式方面不对你做任何限制，所以你当然可以按照MVC模式来走。在这篇教程里，我就不往MVC上靠了，因为太耗时间，信息量也太大，所以我们就充分利用Nancy的Module来进行开发吧。
+
+[b]NancyModule[/b]
+打开你的IndexModule，你会看到这段代码：
+[code=csharp]public IndexModule()
+{
+    Get["/"] = parameters =>
+    {
+        return View["index"];
+    };
+}[/code]
+这段代码就是Nancy的核心思想。Get["/"]是指：我要处理关于所有对于网站根目录的请求。比如说你的网站域名为example.com，那么"/"就代表example.com本身。"/login"就代表example.com/login。也就是说，路径永远是相对于网站根目录的。
+
+那么Get是什么意思呢？你应该已经猜到了：这代表请求的verb，也就是"GET"。那么整段函数的意思就很明显了：对于所有访问网站根目录的GET请求，我们都返回一个index页面。这里的index对应你项目下的index.sshtml。
+
+[b]SSHTML[/b]
+SSHTML是一种简单的视图引擎。如果你知道Razor(.cshtml)，那么你可以把SSHTML相像成另一个版本的Razor，虽然它们二者的语法相去甚远。SSHTML我就不在这里介绍了，因为你可以在[url=https://github.com/NancyFx/Nancy/wiki/The-Super-Simple-View-Engine]这里[/url]找到更好的文档。
+
+[b]静态页面 - Modules and Tests[/b]
+为了热身，我们从静态页面开始。前面说过，我们将利用NancyModule进行开发。首先删掉你的IndexModule和IndexModuleTest。我们来想一下：
+Sign in, Sign out -- 这组功能我们放在LoginModule中。
+Sign-up -- 这一功能我们用AccountModule来实现。
+Memo -- 核心功能，我们封装到MemoModule里。
+
+因此，根据上面所讲的，建立三个NancyModule类，具体如下：
+[code=csharp]
+    public class AccountModule : NancyModule
+    {
+        public AccountModule()
+        {
+            Get["/signup"] = parameters =>
+            {
+                return View["account/create.sshtml"];
+            };
+        }
+    }[/code]
+
+[code=csharp]        
+        public LoginModule()
+        {
+            Get["/login"] = parameters =>
+            {
+                return View["login/login.sshtml"];
+            };
+        }[/code]
+
+[code=csharp]        
+        public MemoModule()
+        {
+            Get["/"] = parameters =>
+            {
+                return View["memo/index"];
+            };
+        }[/code]
+
+相应的，我们需要对应的测试类：
+[code=csharp]public class AccountTest : BaseTest
+    {
+        [Test]
+        public void signup_route_should_be_successful()
+        {
+            var browser = new Browser(Bootstrapper);
+            var response = browser.Get("/signup");
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+        }
+    }[/code]
+[code=csharp]    public class LoginTest : BaseTest
+    {
+        [Test]
+        public void login_route_should_be_successful()
+        {
+            var browser = new Browser(Bootstrapper);
+            var response = browser.Get("/login");
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+        }
+    }[/code]
+
+[code=csharp]    public class MemoTest : BaseTest
+    {
+        [Test]
+        public void root_route_should_be_successful()
+        {
+            var browser = new Browser(Bootstrapper);
+            var response = browser.Get("/");
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+        }
+    }[/code]
+
+你会发现以上三个类都继承了BaseTest:
+[code=csharp]    [TestFixture]
+    public abstract class BaseTest
+    {
+        private INancyBootstrapper _bootsrapper = new ConfigurableBootstrapper(with =>
+        {
+            with.Module<AccountModule>();
+            with.Module<LoginModule>();
+            with.Module<MemoModule>();
+            with.RootPathProvider(new TestRootPathProvider());
+        });
+
+        protected INancyBootstrapper Bootstrapper
+        {
+            get { return _bootsrapper; }
+        }
+    }[/code]
+有了这些以后，如果你重新编译整个项目，然后用NUnit去跑测试，测试应该不会通过，原因在于我们还没有任何View，即视图。
+
+[b]静态页面 - 视图[/b]
+如果你有一点项目经验，你就会知道，首先我们得有个模版页。在Views文件夹下，新建_master.sshtml，_footer.sshtml和_header.sshtml。
+
+如果你是前端开发人员，你应该有用过前端框架的经验。恰好最近Bootstrap3发布了，我们就用Bootstrap3，这样可以节省很多编写和调试CSS的时间。
+
+到这里下载Bootstrap: [url=http://getbootstrap.com/getting-started/]http://getbootstrap.com/getting-started/[/url]
+
+Bootstrap需要jQuery的支持，所以你还得下个jQuery，我下载的是jQuery-1.10.2（如果你和我一样，一点也不想支持IE9以下的版本的浏览器，你也可以下载jQuery 2.0+，这是题外话了）。
+
+一切下载都顺利的话，把bootstrap.css放到Contet/css下（如果你没有其中任何文件夹，直接新建一个就可以）。顺便新建一个non-responsive.css，其内容如下：
+
+
+[code=css]/* Template-specific stuff
+ *
+ * Customizations just for the template—these are not necessary for anything
+ * with disabling the responsiveness.
+ */
+
+/* Account for fixed navbar */
+body {
+  padding-top: 70px;
+  padding-bottom: 30px;
+}
+
+/* Finesse the page header spacing */
+.page-header {
+  margin-bottom: 30px;
+}
+.page-header .lead {
+  margin-bottom: 10px;
+}
+
+
+/* Non-responsive overrides
+ *
+ * Utilitze the following CSS to disable the responsive-ness of the container,
+ * grid system, and navbar.
+ */
+
+/* Reset the container */
+.container {
+  max-width: none !important;
+  width: 970px;
+}
+
+/* Demonstrate the grids */
+.col-xs-4 {
+  padding-top: 15px;
+  padding-bottom: 15px;
+  background-color: #eee;
+  border: 1px solid #ddd;
+  background-color: rgba(86,61,124,.15);
+  border: 1px solid rgba(86,61,124,.2);
+}
+
+.container .navbar-header,
+.container .navbar-collapse {
+  margin-right: 0;
+  margin-left: 0;
+}
+
+/* Always float the navbar header */
+.navbar-header {
+  float: left;
+}
+
+/* Undo the collapsing navbar */
+.navbar-collapse {
+  display: block !important;
+  height: auto !important;
+  padding-bottom: 0;
+  overflow: visible !important;
+}
+
+.navbar-toggle {
+  display: none;
+}
+
+.navbar-brand {
+  margin-left: -15px;
+}
+
+/* Always apply the floated nav */
+.navbar-nav {
+  float: left;
+  margin: 0;
+}
+.navbar-nav > li {
+  float: left;
+}
+.navbar-nav > li > a {
+  padding: 15px;
+}
+
+/* Redeclare since we override the float above */
+.navbar-nav.navbar-right {
+  float: right;
+}
+
+/* Undo custom dropdowns */
+.navbar .open .dropdown-menu {
+  position: absolute;
+  float: left;
+  background-color: #fff;
+  border: 1px solid #cccccc;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-width: 0 1px 1px;
+  border-radius: 0 0 4px 4px;
+  -webkit-box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
+          box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
+}
+.navbar .open .dropdown-menu > li > a {
+  color: #333;
+}
+.navbar .open .dropdown-menu > li > a:hover,
+.navbar .open .dropdown-menu > li > a:focus,
+.navbar .open .dropdown-menu > .active > a,
+.navbar .open .dropdown-menu > .active > a:hover,
+.navbar .open .dropdown-menu > .active > a:focus {
+  color: #fff !important;
+  background-color: #428bca !important;
+}
+.navbar .open .dropdown-menu > .disabled > a,
+.navbar .open .dropdown-menu > .disabled > a:hover,
+.navbar .open .dropdown-menu > .disabled > a:focus {
+  color: #999 !important;
+  background-color: transparent !important;
+}[/code]
+
+non-responsive.css来自于Bootstrap的一个模版：[url=http://getbootstrap.com/examples/non-responsive/]http://getbootstrap.com/examples/non-responsive/[/url]
+
+顺便说一下：我就不在这里做响应式页面了，虽然Bootstrap3倾向于于mobile-first的开发模式，但是这篇教程不是前段教程，所以我们就直接做成非响应式的。如果你对CSS感兴趣，那么我推荐[url=http://shop.oreilly.com/product/0636920024996.do]CSS Missing Manual[/url]给你。如果你对写CSS非常感兴趣，你还需要学习SASS或LESS（链接我就不给了，自己google一下）。
+
+Okay，下面我们来填充_master.sshtml:
+[code=html]<!DOCTYPE html>
+<html>
+  <head>
+    <title>My Memo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <!-- Bootstrap -->
+    <link href="@Path['~/Content/css/bootstrap.css']" rel="stylesheet" media="screen"/>
+    <link href="@Path['~/Content/css/non-responsive.css']" rel="stylesheet" media="screen"/>
+    <script src="@Path['~/Content/js/jquery-1.10.2.js']"></script>
+    <script src="@Path['~/Content/js/bootstrap.js']"></script>
+  </head>
+  <body>
+    <header>
+      @Partial['_header.sshtml']
+    </header>
+    @Section['content']
+    <footer>
+      @Partial['_footer.sshtml']
+    </footer>
+  </body>
+</html>[/code]
+
+紧接着是_header.sshtml:
+[code=html]<div class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="@Path['~/']">My Memo</a>
+        </div>
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <li><a href="@Path['~/']">Memo</a></li>
+                <li><a href="#">About</a></li>
+                <li><a href="#">Contact</a></li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="@Path['~/login']">Login</a></li>
+                <li><a href="@Path['~/signup']">Sign up</a></li>
+            </ul>
+        </div>
+    </div>
+</div>[/code]
+
+最后是_footer.sshtml，我们暂时将其留空。
+
+在Views下新建三个文件夹：account, login, memo。
+在account中添加create.sshtml：
+[code=html]@Master['_master.sshtml']
+
+@Section['content']
+<div class="container">
+
+  <div class="page-header">
+    <h1>Sign up</h1>
+  </div>
+
+</div>
+@EndSection[/code]
+在login中添加login.sshtml：
+[code=html]@Master['_master.sshtml']
+
+@Section['content']
+<div class="container">
+
+  <div class="page-header">
+    <h1>Log in</h1>
+  </div>
+
+</div>
+@EndSection[/code]
+在memo中添加index.sshtml：
+[code=html]@Master['_master.sshtml']
+
+@Section['content']
+<div class="container">
+
+  <div class="page-header">
+    <h1>Memo</h1>
+    <p class="lead">You have the following memos.</p>
+  </div>
+
+</div>
+@EndSection[/code]
+
+有了这些文件之后，重新编译，然后用NUnit跑测试。如果跑不通，请大家根据错误信息自行调试。
+
+总结一下，今天内容可能稍微有点多，我们主要学习了：
+NancyModule，SSHTML(Super Simple View Engine)，Bootstrap得配置。
+
+待续。
